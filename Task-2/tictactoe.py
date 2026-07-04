@@ -7,7 +7,7 @@ using the Minimax algorithm and always picks the optimal move.
 Alpha-Beta Pruning skips branches that can't change the outcome — verified
 to cut 62% of nodes evaluated vs. an unordered scan on an empty board.
 
-Author: <Your Name Here>
+Author: Jeffin Josva S
 """
 
 import math
