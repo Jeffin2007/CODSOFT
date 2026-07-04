@@ -39,9 +39,7 @@ WIN_COMBOS: List[Tuple[int, int, int]] = [
     (2, 4, 6),  # diagonal top-right to bottom-left
 ]
 
-# Evaluate center first, then corners, then edges.
-# Alpha-Beta pruning cuts most aggressively when the best moves are seen first.
-# Verified: this ordering evaluates 62% fewer nodes than a plain 0-8 scan.
+
 MOVE_PRIORITY: List[int] = [4, 0, 2, 6, 8, 1, 3, 5, 7]
 
 
@@ -149,9 +147,9 @@ def minimax(
     """
     winner = get_winner(board)
     if winner == AI:
-        return WIN_SCORE - depth    # earlier win scores higher
+        return WIN_SCORE - depth    
     if winner == HUMAN:
-        return LOSE_SCORE + depth   # later loss scores less badly
+        return LOSE_SCORE + depth  
     if is_draw(board):
         return DRAW_SCORE
 
@@ -161,9 +159,9 @@ def minimax(
     if is_maximizing:
         best_score = -math.inf
         for idx in empty_cells:
-            board[idx] = AI                                         # try move
+            board[idx] = AI                                         
             score = minimax(board, depth + 1, False, alpha, beta)
-            board[idx] = EMPTY                                      # undo move
+            board[idx] = EMPTY                                      
             best_score = max(best_score, score)
             alpha = max(alpha, best_score)
             if beta <= alpha:
@@ -174,9 +172,9 @@ def minimax(
     else:
         best_score = math.inf
         for idx in empty_cells:
-            board[idx] = HUMAN                                      # try move
+            board[idx] = HUMAN                                    
             score = minimax(board, depth + 1, True, alpha, beta)
-            board[idx] = EMPTY                                      # undo move
+            board[idx] = EMPTY                                      #
             best_score = min(best_score, score)
             beta = min(beta, best_score)
             if beta <= alpha:
@@ -212,7 +210,7 @@ def get_best_move(board: List[str]) -> int:
             best_score = score
             best_moves = [idx]
         elif score == best_score:
-            best_moves.append(idx)   # collect ties for random selection
+            best_moves.append(idx) 
 
     return random.choice(best_moves)
 
@@ -263,7 +261,6 @@ def announce_result(board: List[str]) -> None:
     if winner == AI:
         print("  The AI wins! Better luck next time.\n")
     elif winner == HUMAN:
-        # Should never happen against a correct Minimax AI
         print("  You win! Impressive.\n")
     else:
         print("  It's a draw! Well played.\n")
@@ -311,8 +308,6 @@ def main() -> None:
     print("  CODSOFT AI Internship - Task 2")
     print("  Tic-Tac-Toe  vs  Minimax AI")
     print("=" * 42)
-    print("\n  The AI uses Minimax + Alpha-Beta Pruning.")
-    print("  It is unbeatable — your best result is a draw!")
 
     while True:
         play_game()
