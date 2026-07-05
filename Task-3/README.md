@@ -50,6 +50,7 @@ image_captioning/
 ├── caption.py          ← main entry point (inference)
 ├── train.py            ← training loop
 ├── evaluate.py         ← BLEU scoring
+├──text_processing.py   ← Installing punkt
 ├── models/
 │   ├── encoder.py      ← ResNet50 CNN encoder
 │   └── decoder.py      ← LSTM decoder + greedy/beam decoding
