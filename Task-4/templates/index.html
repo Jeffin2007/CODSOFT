@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionID AI - Face Detection & Recognition Platform</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i data-lucide="scan-face"></i>
+                </div>
+                <div class="brand-title">
+                    <h2>VisionID <span>AI</span></h2>
+                    <p>Computer Vision Engine</p>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-tab="tab-webcam">
+                    <i data-lucide="camera"></i>
+                    <span>Live Stream</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-image">
+                    <i data-lucide="image"></i>
+                    <span>Image Inspector</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-video">
+                    <i data-lucide="video"></i>
+                    <span>Video Processor</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-enroll">
+                    <i data-lucide="user-plus"></i>
+                    <span>Face Enrollment</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-gallery">
+                    <i data-lucide="users"></i>
+                    <span>Identity Database</span>
+                </button>
+            </nav>
+
+            <div class="system-status-card">
+                <div class="status-header">
+                    <span class="status-dot active"></span>
+                    <span class="status-label">Pipeline Active</span>
+                </div>
+                <div class="status-metrics">
+                    <div class="metric">
+                        <span class="lbl">Detector</span>
+                        <span class="val" id="hud-active-model">YuNet DNN</span>
+                    </div>
+                    <div class="metric">
+                        <span class="lbl">Embedder</span>
+                        <span class="val">FaceNet 512d</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header Toolbar -->
+            <header class="top-header">
+                <div class="header-title">
+                    <h1 id="page-title">Live Webcam Stream</h1>
+                    <p id="page-subtitle">Real-time face detection and deep learning recognition</p>
+                </div>
+
+                <div class="header-controls">
+                    <div class="control-group">
+                        <label for="select-detector"><i data-lucide="cpu"></i> Detector Model:</label>
+                        <select id="select-detector" class="custom-select">
+                            <option value="yunet" selected>YuNet DNN (Recommended - SOTA)</option>
+                            <option value="haar">Haar Cascade (Lightweight CPU)</option>
+                            <option value="mtcnn">MTCNN (PyTorch Cascade)</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <!-- TAB 1: WEBCAM LIVE STREAM -->
+            <section id="tab-webcam" class="tab-page active">
+                <div class="stream-layout">
+                    <div class="viewport-card glass-panel">
+                        <div class="video-container">
+                            <video id="webcam-video" autoplay playsinline muted></video>
+                            <canvas id="webcam-canvas" class="hidden"></canvas>
+                            <img id="processed-stream-view" class="stream-view" src="" alt="Live Stream View">
+                            <div id="camera-placeholder" class="placeholder-overlay">
+                                <i data-lucide="video-off"></i>
+                                <h3>Webcam Disconnected</h3>
+                                <p>Click start below to initialize camera stream</p>
+                                <button id="btn-start-webcam" class="btn btn-primary">
+                                    <i data-lucide="play"></i> Start Camera
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="viewport-toolbar">
+                            <button id="btn-stop-webcam" class="btn btn-danger hidden">
+                                <i data-lucide="square"></i> Stop Camera
+                            </button>
+                            <button id="btn-snapshot-enroll" class="btn btn-secondary hidden">
+                                <i data-lucide="user-check"></i> Enroll Current Face
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Live Telemetry Card -->
+                    <div class="telemetry-panel glass-panel">
+                        <h3><i data-lucide="activity"></i> Real-Time Analytics</h3>
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon green"><i data-lucide="gauge"></i></div>
+                                <div class="stat-data">
+                                    <span class="stat-val" id="stat-fps">0.0</span>
+                                    <span class="stat-lbl">FPS</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon blue"><i data-lucide="users"></i></div>
+                                <div class="stat-data">
+                                    <span class="stat-val" id="stat-faces">0</span>
+                                    <span class="stat-lbl">Detected Faces</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon purple"><i data-lucide="zap"></i></div>
+                                <div class="stat-data">
+                                    <span class="stat-val" id="stat-latency">0 ms</span>
+                                    <span class="stat-lbl">Inference Latency</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detections-list-card">
+                            <h4>Detected Identities</h4>
+                            <ul id="live-identities-list" class="live-list">
+                                <li class="empty-msg">No faces currently in view</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: IMAGE INSPECTOR -->
+            <section id="tab-image" class="tab-page">
+                <div class="workspace-grid">
+                    <div class="dropzone-card glass-panel" id="image-dropzone">
+                        <input type="file" id="image-file-input" accept="image/*" class="hidden">
+                        <div class="dropzone-content">
+                            <i data-lucide="upload-cloud"></i>
+                            <h3>Upload Photo for Inspection</h3>
+                            <p>Drag and drop an image file here or click to browse</p>
+                            <span class="file-types">Supports JPG, PNG, WEBP, BMP</span>
+                        </div>
+                    </div>
+
+                    <div class="inspector-card glass-panel">
+                        <h3>Detection Results</h3>
+                        <div class="image-view-wrapper">
+                            <img id="image-result-view" class="result-img hidden" alt="Annotated Image Result">
+                            <div id="image-result-placeholder" class="placeholder-overlay">
+                                <i data-lucide="eye"></i>
+                                <p>Upload an image to display recognition results</p>
+                            </div>
+                        </div>
+                        <div id="image-detections-summary" class="summary-box hidden"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: VIDEO PROCESSOR -->
+            <section id="tab-video" class="tab-page">
+                <div class="workspace-grid">
+                    <div class="dropzone-card glass-panel" id="video-dropzone">
+                        <input type="file" id="video-file-input" accept="video/mp4,video/avi,video/quicktime" class="hidden">
+                        <div class="dropzone-content">
+                            <i data-lucide="film"></i>
+                            <h3>Upload Video File</h3>
+                            <p>Upload .mp4 or .avi file for full batch processing</p>
+                            <button class="btn btn-secondary mt-2">Select Video</button>
+                        </div>
+                    </div>
+
+                    <div class="inspector-card glass-panel">
+                        <h3>Video Processing Status</h3>
+                        <div id="video-progress-card" class="progress-card hidden">
+                            <div class="progress-info">
+                                <span id="video-status-text">Processing frame 0...</span>
+                                <span id="video-pct-text">0%</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div id="video-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div class="image-view-wrapper">
+                            <video id="video-result-player" class="result-video hidden" controls></video>
+                            <div id="video-result-placeholder" class="placeholder-overlay">
+                                <i data-lucide="clapperboard"></i>
+                                <p>Processed video output will be rendered here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: FACE ENROLLMENT -->
+            <section id="tab-enroll" class="tab-page">
+                <div class="enroll-form-card glass-panel">
+                    <h3><i data-lucide="user-plus"></i> Register New Face Identity</h3>
+                    <p class="subtitle">Upload a photo of a person to add their biometric embedding to the gallery database.</p>
+
+                    <form id="enroll-form">
+                        <div class="form-group">
+                            <label for="enroll-name">Full Name / Identity Tag:</label>
+                            <input type="text" id="enroll-name" class="custom-input" placeholder="e.g. Dr. Sarah Connor" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Sample Face Photo:</label>
+                            <div class="enroll-dropzone" id="enroll-dropzone">
+                                <input type="file" id="enroll-file-input" accept="image/*" class="hidden">
+                                <img id="enroll-preview-img" class="enroll-preview hidden" alt="Enroll Preview">
+                                <div id="enroll-drop-prompt" class="drop-prompt">
+                                    <i data-lucide="camera-off"></i>
+                                    <span>Click or drag image to select photo</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btn-submit-enroll" class="btn btn-primary btn-lg">
+                            <i data-lucide="check-circle-2"></i> Enroll Identity into Database
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- TAB 5: IDENTITY DATABASE -->
+            <section id="tab-gallery" class="tab-page">
+                <div class="gallery-header">
+                    <h3>Enrolled Identity Gallery</h3>
+                    <button id="btn-refresh-gallery" class="btn btn-secondary">
+                        <i data-lucide="rotate-cw"></i> Refresh List
+                    </button>
+                </div>
+
+                <div id="identity-cards-grid" class="identity-grid">
+                    <!-- Cards dynamically rendered by JavaScript -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
